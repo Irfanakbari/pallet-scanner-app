@@ -21,6 +21,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final TextEditingController _controllerIp = TextEditingController();
+
   final storage = const FlutterSecureStorage();
   final dio = Dio();
 
@@ -309,7 +311,16 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
+                await storage.write(
+                    key: "@vuteq-ip", value: _controllerIp.text);
+                Fluttertoast.showToast(
+                  msg: "IP Berhasil Disimpan",
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.TOP,
+                  backgroundColor: Colors.green,
+                  textColor: Colors.white,
+                );
                 Navigator.pop(context); // Tutup dialog
               },
               style: TextButton.styleFrom(
