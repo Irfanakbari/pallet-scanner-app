@@ -1,12 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dialogs/flutter_dialogs.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:material_dialogs/material_dialogs.dart';
 import 'package:material_dialogs/widgets/buttons/icon_button.dart';
 import 'package:material_dialogs/widgets/buttons/icon_outline_button.dart';
+import 'package:pallet_vuteq/screen/ip_change2.dart';
 import 'package:pallet_vuteq/screen/login.dart';
 import 'package:pallet_vuteq/screen/riwayat.dart';
 import 'package:pallet_vuteq/screen/scanner_in.dart';
@@ -252,7 +252,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    _showInputDialog(context);
+                    Get.to(const IpChange2());
                   },
                   style: ElevatedButton.styleFrom(
                     primary:
@@ -281,63 +281,6 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
       ),
-    );
-  }
-
-  void _showInputDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return BasicDialogAlert(
-          title: const Text("Alamat IP Server"),
-          content: TextFormField(
-            decoration: const InputDecoration(
-              hintText: "Masukkan IP Disini",
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.blue, // Warna tombol tutup dialog
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-              ),
-              child: const Text(
-                "Batal",
-                style: TextStyle(fontSize: 15.0, color: Colors.white),
-              ),
-            ),
-            TextButton(
-              onPressed: () async {
-                await storage.write(
-                    key: "@vuteq-ip", value: _controllerIp.text);
-                Fluttertoast.showToast(
-                  msg: "IP Berhasil Disimpan",
-                  toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.TOP,
-                  backgroundColor: Colors.green,
-                  textColor: Colors.white,
-                );
-                Navigator.pop(context); // Tutup dialog
-              },
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.green, // Warna tombol OK
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-              ),
-              child: const Text(
-                "Simpan",
-                style: TextStyle(fontSize: 15.0, color: Colors.white),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }

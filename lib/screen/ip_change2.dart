@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:restart_app/restart_app.dart';
+import 'package:get/get.dart';
+import 'package:pallet_vuteq/screen/homepage.dart';
 
-class IpChange extends StatefulWidget {
-  const IpChange({
+class IpChange2 extends StatefulWidget {
+  const IpChange2({
     Key? key,
   }) : super(key: key);
 
   @override
-  State<IpChange> createState() => _IpChangeState();
+  State<IpChange2> createState() => _IpChange2State();
 }
 
-class _IpChangeState extends State<IpChange> {
+class _IpChange2State extends State<IpChange2> {
   final storage = const FlutterSecureStorage();
 
   final TextEditingController _controllerIp = TextEditingController();
@@ -34,7 +35,7 @@ class _IpChangeState extends State<IpChange> {
         backgroundColor: Colors.green,
         textColor: Colors.white,
       );
-      Restart.restartApp();
+      await Get.off(const MyHomePage());
     } catch (e) {
       Fluttertoast.showToast(
         msg: "IP Gagal Disimpan",

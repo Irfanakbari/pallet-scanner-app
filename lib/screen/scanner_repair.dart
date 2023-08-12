@@ -5,13 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:newlandscanner/newlandscanner.dart';
-import 'package:path_provider/path_provider.dart';
-
-import '../model/history_entry.dart';
 
 class ScannerRepair extends StatefulWidget {
   const ScannerRepair({Key? key}) : super(key: key);
@@ -71,16 +67,6 @@ class _ScannerRepairState extends State<ScannerRepair> {
             ));
 
         riwayat.add({"qr": qrCode.value, "date": DateTime.now()});
-
-        final appDocumentDir = await getApplicationDocumentsDirectory();
-
-        final hiveBox =
-            await Hive.openBox('history_entries', path: appDocumentDir.path);
-
-        // Save to Hive database
-        final entry = HistoryEntry(
-            qr: qrCode.value, date: DateTime.now(), status: 'Maintenance');
-        await hiveBox.add(entry);
 
         Fluttertoast.showToast(
           msg: response.data['data'],

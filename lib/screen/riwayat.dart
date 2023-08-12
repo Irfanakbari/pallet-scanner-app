@@ -3,11 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
-
-import '../model/history_entry.dart';
 
 class Riwayat extends StatefulWidget {
   const Riwayat({Key? key}) : super(key: key);
@@ -32,16 +28,29 @@ class _RiwayatState extends State<Riwayat> {
   void initState() {
     super.initState();
     // Load the data from the Hive database when the widget initializes
-    removeOldHistory();
     loadHistoryEntries();
   }
 
   Future<void> loadHistoryEntries() async {
+    final cookie = await storage.read(
+        key: '@vuteq-token'); // Ubah dengan key cookie yang sesuai
+
+    // Buat header cookie untuk permintaan HTTP
+    final headers = {
+      'Cookie': cookie != null ? '@vuteq-token=$cookie' : '',
+    };
     try {
       // Get the list of HistoryEntry objects from the Hive database
-      final entries = await getAllHistoryEntries();
+      final base = await storage.read(key: '@vuteq-ip');
+      final response = await dio.get('http://$base/api/history/operator',
+          options: Options(
+            headers: headers,
+            receiveTimeout: const Duration(milliseconds: 5000),
+            sendTimeout: const Duration(milliseconds: 5000),
+          ));
       riwayat.clear(); // Clear the existing list
-      riwayat.addAll(entries); // Add the new entries to the RxList
+      riwayat
+          .addAll(response.data['data']); // Add the new entries to the RxList
     } catch (e) {
       // Handle any potential errors, e.g., when the database is not open
       Fluttertoast.showToast(
@@ -52,28 +61,6 @@ class _RiwayatState extends State<Riwayat> {
         textColor: Colors.white,
       );
     }
-  }
-
-  void removeOldHistory() async {
-    final hiveBox = await Hive.openBox<HistoryEntry>('history_entries');
-    final allEntries = hiveBox.values.toList();
-
-    DateTime now = DateTime.now();
-    DateTime yesterday = now.subtract(const Duration(days: 1));
-
-    // Hapus data yang lebih lama dari tanggal kemarin
-    for (var entry in allEntries) {
-      if (entry.date.isBefore(yesterday)) {
-        await entry.delete();
-      }
-    }
-  }
-
-  Future<List<HistoryEntry>> getAllHistoryEntries() async {
-    final appDocumentDir = await getApplicationDocumentsDirectory();
-    final hiveBox =
-        await Hive.openBox('history_entries', path: appDocumentDir.path);
-    return hiveBox.values.toList().cast<HistoryEntry>();
   }
 
   @override
@@ -90,7 +77,7 @@ class _RiwayatState extends State<Riwayat> {
                   const SizedBox(height: 20),
                   const Center(
                     child: Text(
-                      'Riwayat Scan Harian',
+                      'Riwayat Scan Hari Ini',
                       style:
                           TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     ),
@@ -130,11 +117,11 @@ class _RiwayatState extends State<Riwayat> {
                             ),
                             DataCell(
                               Container(
-                                width: 160,
+                                width: 135,
                                 alignment: Alignment
                                     .centerLeft, // Posisi isi sel di tengah kiri
                                 child: Text(
-                                  riwayat[index].qr,
+                                  riwayat[index]['id_pallet'],
                                   style: const TextStyle(fontSize: 16),
                                 ),
                               ),
@@ -142,16 +129,16 @@ class _RiwayatState extends State<Riwayat> {
                             DataCell(
                               // Added the 'Status' cell
                               Text(
-                                riwayat[index]
-                                    .status, // Replace this with the actual status data
+                                riwayat[index][
+                                    'status'], // Replace this with the actual status data
                                 style: const TextStyle(fontSize: 16),
                               ),
                             ),
                             DataCell(
                               SizedBox(
                                 child: Text(
-                                  DateFormat('HH:mm:ss')
-                                      .format(riwayat[index].date),
+                                  DateFormat('HH:mm:ss').format(DateTime.parse(
+                                      riwayat[index]['timestamp'])),
                                   style: const TextStyle(fontSize: 16),
                                 ),
                               ),
