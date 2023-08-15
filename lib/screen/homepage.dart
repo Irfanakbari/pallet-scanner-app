@@ -26,9 +26,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final storage = const FlutterSecureStorage();
   final GlobalController globalController =
       Get.find(); // Inisialisasi controller
-
   final dio = Dio();
-  RxString user = ''.obs;
 
   Future<void> _logout() async {
     try {

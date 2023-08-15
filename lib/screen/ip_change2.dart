@@ -15,7 +15,6 @@ class IpChange2 extends StatefulWidget {
 
 class _IpChange2State extends State<IpChange2> {
   final storage = const FlutterSecureStorage();
-
   final TextEditingController _controllerIp = TextEditingController();
 
   @override
