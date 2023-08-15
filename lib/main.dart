@@ -1,6 +1,5 @@
 import 'package:easy_splash_screen/easy_splash_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart'; // Import this if you want to use Hive with Flutter
 import 'package:palestine_first_run/palestine_first_run.dart';
@@ -8,6 +7,7 @@ import 'package:pallet_vuteq/screen/homepage.dart';
 import 'package:pallet_vuteq/screen/ip_change.dart';
 import 'package:pallet_vuteq/screen/login.dart';
 
+import 'controller/global_controller.dart';
 import 'model/history_entry.dart';
 
 void main() {
@@ -26,14 +26,14 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
-  static const storage = FlutterSecureStorage();
   RxBool isLogin = false.obs;
   RxBool isFirst = true.obs;
+  final GlobalController globalController =
+      Get.put(GlobalController()); // Inisialisasi controller
 
   Future<void> _checkLogin() async {
     isFirst.value = await PalFirstRun.isFirstRun();
-    var token = await storage.read(key: "@vuteq-token");
-    if (token != null) {
+    if (globalController.token != '') {
       isLogin.value = true;
     }
   }

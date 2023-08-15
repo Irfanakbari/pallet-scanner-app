@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 
+import '../controller/global_controller.dart';
 import 'homepage.dart';
 
 class Login extends StatefulWidget {
@@ -18,7 +19,8 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   final storage = const FlutterSecureStorage();
-
+  final GlobalController globalController =
+      Get.find(); // Inisialisasi controller
   final GlobalKey<FormState> _formKey = GlobalKey();
 
   final FocusNode _focusNodePassword = FocusNode();
@@ -64,7 +66,6 @@ class _LoginState extends State<Login> {
     final username = _controllerUsername.text;
     final password = _controllerPassword.text;
     final dio = Dio();
-
     // Lakukan validasi form
     if (_formKey.currentState!.validate()) {
       // Kirim permintaan HTTP dengan metode POST
@@ -77,7 +78,7 @@ class _LoginState extends State<Login> {
               receiveTimeout: const Duration(milliseconds: 5000),
               sendTimeout: const Duration(milliseconds: 5000),
             ));
-        await storage.write(key: "@vuteq-token", value: response.data['token']);
+        globalController.setGlobalVariable(response.data['token']);
         Fluttertoast.showToast(
           msg: "Login Berhasil",
           toastLength: Toast.LENGTH_SHORT,

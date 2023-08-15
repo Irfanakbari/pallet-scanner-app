@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:restart_app/restart_app.dart';
+import 'package:get/get.dart';
+import 'package:pallet_vuteq/screen/login.dart';
 
 class IpChange extends StatefulWidget {
   const IpChange({
@@ -34,7 +35,7 @@ class _IpChangeState extends State<IpChange> {
         backgroundColor: Colors.green,
         textColor: Colors.white,
       );
-      Restart.restartApp();
+      await Get.off(const Login());
     } catch (e) {
       Fluttertoast.showToast(
         msg: "IP Gagal Disimpan",

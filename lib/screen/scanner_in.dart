@@ -9,6 +9,8 @@ import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:newlandscanner/newlandscanner.dart';
 
+import '../controller/global_controller.dart';
+
 class ScannerIn extends StatefulWidget {
   const ScannerIn({Key? key}) : super(key: key);
 
@@ -18,6 +20,8 @@ class ScannerIn extends StatefulWidget {
 
 class _ScannerInState extends State<ScannerIn> {
   final storage = const FlutterSecureStorage();
+  final GlobalController globalController =
+      Get.find(); // Inisialisasi controller
   final dio = Dio();
   RxString qrCode = "-".obs;
   RxList riwayat = [].obs;
@@ -44,12 +48,11 @@ class _ScannerInState extends State<ScannerIn> {
     Future<void> submitData() async {
       context.loaderOverlay.show();
       // Ambil cookie dari Flutter Secure Storage
-      final cookie = await storage.read(
-          key: '@vuteq-token'); // Ubah dengan key cookie yang sesuai
+      final cookie = globalController.token;
 
       // Buat header cookie untuk permintaan HTTP
       final headers = {
-        'Cookie': cookie != null ? '@vuteq-token=$cookie' : '',
+        'Cookie': '@vuteq-token=$cookie',
       };
 
       final Map<String, dynamic> postData = {

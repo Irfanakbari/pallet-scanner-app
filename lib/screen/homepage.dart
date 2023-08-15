@@ -13,6 +13,8 @@ import 'package:pallet_vuteq/screen/scanner_in.dart';
 import 'package:pallet_vuteq/screen/scanner_out.dart';
 import 'package:pallet_vuteq/screen/scanner_repair.dart';
 
+import '../controller/global_controller.dart';
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
 
@@ -21,31 +23,24 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final TextEditingController _controllerIp = TextEditingController();
-
   final storage = const FlutterSecureStorage();
+  final GlobalController globalController =
+      Get.find(); // Inisialisasi controller
+
   final dio = Dio();
+  RxString user = ''.obs;
 
   Future<void> _logout() async {
     try {
-      final base = await storage.read(key: '@vuteq-ip');
-      await dio
-          .get('http://$base/api/auth/logout',
-              options: Options(
-                receiveTimeout: const Duration(milliseconds: 5000),
-                sendTimeout: const Duration(milliseconds: 5000),
-              ))
-          .then((value) async {
-        Fluttertoast.showToast(
-          msg: "Logout Berhasil",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.green,
-          textColor: Colors.white,
-        );
-        await storage.delete(key: "@vuteq-token");
-        await Get.off(const Login());
-      });
+      globalController.clearGlobalVariable();
+      Fluttertoast.showToast(
+        msg: "Logout Berhasil",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+      );
+      await Get.off(const Login());
     } catch (e) {
       Fluttertoast.showToast(
         msg: "Logout Gagal",
@@ -55,6 +50,12 @@ class _MyHomePageState extends State<MyHomePage> {
         textColor: Colors.white,
       );
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Load the data from the Hive database when the widget initializes
   }
 
   @override
@@ -71,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
               Column(children: [
                 Image.asset(
                   'assets/images/logo.png',
-                  width: 300,
+                  width: 200,
                 ),
                 const SizedBox(height: 30),
                 InkWell(

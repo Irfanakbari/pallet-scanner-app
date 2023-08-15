@@ -5,6 +5,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+import '../controller/global_controller.dart';
+
 class Riwayat extends StatefulWidget {
   const Riwayat({Key? key}) : super(key: key);
 
@@ -14,6 +16,8 @@ class Riwayat extends StatefulWidget {
 
 class _RiwayatState extends State<Riwayat> {
   final storage = const FlutterSecureStorage();
+  final GlobalController globalController =
+      Get.find(); // Inisialisasi controller
   final dio = Dio();
   RxList riwayat = [].obs;
 
@@ -32,12 +36,11 @@ class _RiwayatState extends State<Riwayat> {
   }
 
   Future<void> loadHistoryEntries() async {
-    final cookie = await storage.read(
-        key: '@vuteq-token'); // Ubah dengan key cookie yang sesuai
+    final cookie = globalController.token;
 
     // Buat header cookie untuk permintaan HTTP
     final headers = {
-      'Cookie': cookie != null ? '@vuteq-token=$cookie' : '',
+      'Cookie': 'vuteq-token=$cookie',
     };
     try {
       // Get the list of HistoryEntry objects from the Hive database
