@@ -52,7 +52,7 @@ class _ScannerInState extends State<ScannerIn> {
 
       // Buat header cookie untuk permintaan HTTP
       final headers = {
-        'Cookie': '@vuteq-token=$cookie',
+        'Cookie': 'vuteq-token=$cookie',
       };
 
       final Map<String, dynamic> postData = {
