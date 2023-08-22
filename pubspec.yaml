@@ -52,6 +52,7 @@ dependencies:
   path_provider: ^2.0.15
   hive_flutter: ^1.1.0
   restart_app: ^1.2.1
+  simple_barcode_scanner: ^0.0.8
 
 dev_dependencies:
   flutter_test:

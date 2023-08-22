@@ -69,27 +69,26 @@ class _RiwayatState extends State<Riwayat> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        resizeToAvoidBottomInset: false,
-        // appBar: AppBar(title: const Text('Scanner Keluar')),
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(5),
-            child: Obx(
-              () => Column(
-                children: [
-                  const SizedBox(height: 20),
-                  const Center(
-                    child: Text(
-                      'Riwayat Scan Hari Ini',
-                      style:
-                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  const SizedBox(height: 20),
-                  Expanded(
-                    child: SingleChildScrollView(
-                        child: DataTable(
+      resizeToAvoidBottomInset: false,
+      // appBar: AppBar(title: const Text('Scanner Keluar')),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(5),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 20),
+              const Center(
+                child: Text(
+                  'Riwayat Scan Hari Ini',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const SizedBox(height: 20),
+              Expanded(
+                  child: SingleChildScrollView(
+                child: Obx(() => DataTable(
                       columnSpacing: 10, // Mengatur jarak antar kolom
                       headingRowHeight: 40, // Mengatur tinggi baris header
                       dataRowHeight: 60, // Mengatur tinggi baris data
@@ -150,12 +149,12 @@ class _RiwayatState extends State<Riwayat> {
                         ),
                       ),
                     )),
-                  ),
-                  const SizedBox(height: 20),
-                ],
-              ),
-            ),
+              )),
+              const SizedBox(height: 20),
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

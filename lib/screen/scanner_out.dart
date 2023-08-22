@@ -20,199 +20,282 @@ class ScannerOut extends StatefulWidget {
 
 class _ScannerOutState extends State<ScannerOut> {
   final storage = const FlutterSecureStorage();
-  final GlobalController globalController =
-      Get.find(); // Inisialisasi controller
+  final GlobalController globalController = Get.find();
   final dio = Dio();
   RxString qrCode = "-".obs;
   RxList riwayat = [].obs;
+  RxList destination = [].obs;
+  String? selectedValue;
   RxBool isSubmitDisabled = true.obs;
 
   @override
   void initState() {
     super.initState();
+    // qrCode.value = "R-BB2BCA021";
+    // getDestination();
     Newlandscanner.listenForBarcodes.listen((event) {
       qrCode.value = event.barcodeData;
+      getDestination();
       isSubmitDisabled.value = false;
     });
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     riwayat.clear();
   }
 
+  Future<void> getDestination() async {
+    final cookie = globalController.token;
+    final headers = {'Cookie': 'vuteq-token=$cookie'};
+
+    try {
+      final base = await storage.read(key: '@vuteq-ip');
+      final response =
+          await dio.get('http://$base/api/destination/get/${qrCode.value}',
+              options: Options(
+                headers: headers,
+                receiveTimeout: const Duration(milliseconds: 5000),
+                sendTimeout: const Duration(milliseconds: 5000),
+              ));
+      destination.value = response.data['data'];
+      if (destination.isNotEmpty) {
+        selectedValue = destination[0]['name'];
+      }
+    } on DioException catch (e) {
+      Fluttertoast.showToast(
+        msg: 'Gagal Mengambil Data Destinasi',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+    }
+  }
+
+  Future<void> submitData() async {
+    context.loaderOverlay.show();
+    final cookie = globalController.token;
+    final headers = {'Cookie': 'vuteq-token=$cookie'};
+    final Map<String, dynamic> postData = {
+      'kode': qrCode.value,
+      'destination': selectedValue
+    };
+
+    try {
+      final base = await storage.read(key: '@vuteq-ip');
+      final response = await dio.post('http://$base/api/history',
+          data: postData,
+          options: Options(
+            headers: headers,
+            receiveTimeout: const Duration(milliseconds: 5000),
+            sendTimeout: const Duration(milliseconds: 5000),
+          ));
+
+      riwayat.add({"qr": qrCode.value, "date": DateTime.now()});
+
+      Fluttertoast.showToast(
+        msg: response.data['data'],
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+      );
+
+      qrCode.value = '-';
+    } on DioException catch (e) {
+      Fluttertoast.showToast(
+        msg: e.response?.data['data'] ?? 'Kesalahan Jaringan/Server',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+    } finally {
+      selectedValue = null;
+      isSubmitDisabled.value = true;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    Future<void> submitData() async {
-      context.loaderOverlay.show();
-      // Ambil cookie dari Flutter Secure Storage
-      final cookie = globalController.token;
-
-      // Buat header cookie untuk permintaan HTTP
-      final headers = {
-        'Cookie': 'vuteq-token=$cookie',
-      };
-
-      final Map<String, dynamic> postData = {
-        'kode': qrCode.value,
-      };
-
-      try {
-        final base = await storage.read(key: '@vuteq-ip');
-        final response = await dio.post('http://$base/api/history',
-            data: postData,
-            options: Options(
-              headers: headers,
-              receiveTimeout: const Duration(milliseconds: 5000),
-              sendTimeout: const Duration(milliseconds: 5000),
-            ));
-
-        riwayat.add({"qr": qrCode.value, "date": DateTime.now()});
-
-        Fluttertoast.showToast(
-          msg: response.data['data'],
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.green,
-          textColor: Colors.white,
-        );
-        // Reset nilai-nilai
-        qrCode.value = '-';
-      } on DioException catch (e) {
-        // Kesalahan jaringan
-        Fluttertoast.showToast(
-          msg: e.response?.data['data'] ?? 'Kesalahan Jaringan/Server',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-        );
-      } finally {
-        isSubmitDisabled.value = true;
-      }
-    }
-
     return LoaderOverlay(
         child: Scaffold(
-            resizeToAvoidBottomInset: false,
-            // appBar: AppBar(title: const Text('Scanner Keluar')),
-            body: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(5),
-                child: Obx(
-                  () => Column(
-                    children: [
-                      const SizedBox(height: 20),
-                      const Center(
-                        child: Text(
-                          'Scanner Keluar Pallet',
-                          style: TextStyle(
-                              fontSize: 22, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      const SizedBox(height: 20),
-                      Container(
-                        color: Colors.grey,
-                        width: double.infinity,
-                        height: 60,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Center(
-                            child: Obx(
-                          () => Text(
-                            qrCode.value,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
-                          ),
-                        )),
-                      ),
-                      const SizedBox(height: 20),
-                      const SizedBox(height: 20),
-                      Expanded(
-                        child: SingleChildScrollView(
-                            child: DataTable(
-                          columnSpacing: 10, // Mengatur jarak antar kolom
-                          headingRowHeight: 40, // Mengatur tinggi baris header
-                          dataRowHeight: 60, // Mengatur tinggi baris data
-                          columns: const [
-                            DataColumn(label: Text('No')),
-                            DataColumn(label: Text('Pallet ID')),
-                            DataColumn(label: Text('Date')),
-                          ],
-                          rows: List.generate(
-                            riwayat.length,
-                            (index) => DataRow(
-                              color: MaterialStateColor.resolveWith((states) {
-                                // Mengatur warna latar belakang untuk baris genap dan ganjil
-                                return index % 2 == 0
-                                    ? Colors.grey[100]!
-                                    : Colors.white;
-                              }),
-                              cells: [
-                                DataCell(
-                                  SizedBox(
-                                    width: 50, // Lebar sel
-                                    child: Text(
-                                      (index + 1).toString(),
-                                      style: const TextStyle(fontSize: 16),
-                                    ),
-                                  ),
-                                ),
-                                DataCell(
-                                  Container(
-                                    width: 200, // Lebar sel
-                                    alignment: Alignment
-                                        .centerLeft, // Posisi isi sel di tengah kiri
-                                    child: Text(
-                                      riwayat[index]['qr'],
-                                      style: const TextStyle(fontSize: 16),
-                                    ),
-                                  ),
-                                ),
-                                DataCell(
-                                  SizedBox(
-                                    child: Text(
-                                      DateFormat('dd-MM-yyyy HH:mm:ss')
-                                          .format(riwayat[index]['date']),
-                                      style: const TextStyle(fontSize: 16),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        )),
-                      ),
-                      const SizedBox(height: 20),
-                      InkWell(
-                          onTap: isSubmitDisabled.value
-                              ? null
-                              : () => {
-                                    submitData().then(
-                                        (value) => context.loaderOverlay.hide())
-                                  },
-                          child: Container(
-                            width: Get.width,
-                            color: Colors.red,
-                            child: const Padding(
-                              padding: EdgeInsets.all(10),
-                              child: Text(
-                                'Submit',
-                                style: TextStyle(
-                                    fontSize: 23, color: Colors.white),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ))
-                    ],
+      resizeToAvoidBottomInset: false,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Obx(
+            () => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 20),
+                const Center(
+                  child: Text(
+                    'Scanner Keluar Pallet',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                 ),
-              ),
-            )));
+                const SizedBox(height: 20),
+                Container(
+                  color: Colors.grey,
+                  height: 60,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  alignment: Alignment.center,
+                  child: Obx(
+                    () => Text(
+                      qrCode.value,
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // ElevatedButton(
+                //   onPressed: () async {
+                //     var res = await Navigator.push(
+                //         context,
+                //         MaterialPageRoute(
+                //           builder: (context) =>
+                //               const SimpleBarcodeScannerPage(),
+                //         ));
+                //     setState(() {
+                //       if (res is String) {
+                //         qrCode.value = res;
+                //         getDestination();
+                //         isSubmitDisabled.value = false;
+                //       }
+                //     });
+                //   },
+                //   child: const Text('Open Scanner'),
+                // ),
+                if (destination.isNotEmpty)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Destinasi:',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color:
+                              Colors.black, // Ubah warna teks jika diperlukan
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: DropdownButton(
+                          isExpanded: true,
+                          value: selectedValue ??
+                              destination[0][
+                                  'name'], // Set the default value to the first item's name
+                          onChanged: (newValue) {
+                            setState(() {
+                              selectedValue = newValue!;
+                            });
+                          },
+                          items: destination
+                              .map<DropdownMenuItem>(
+                                (item) => DropdownMenuItem(
+                                  value: item['name'],
+                                  child: Text(item['name']),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: DataTable(
+                      columnSpacing: 10,
+                      headingRowHeight: 40,
+                      dataRowHeight: 60,
+                      columns: const [
+                        DataColumn(label: Text('No')),
+                        DataColumn(label: Text('Pallet ID')),
+                        DataColumn(label: Text('Date')),
+                      ],
+                      rows: List.generate(
+                        riwayat.length,
+                        (index) => DataRow(
+                          color: MaterialStateColor.resolveWith((states) {
+                            return index % 2 == 0
+                                ? Colors.grey[100]!
+                                : Colors.white;
+                          }),
+                          cells: [
+                            DataCell(
+                              SizedBox(
+                                width: 50,
+                                child: Text(
+                                  (index + 1).toString(),
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                              ),
+                            ),
+                            DataCell(
+                              Container(
+                                width: 200,
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  riwayat[index]['qr'],
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                              ),
+                            ),
+                            DataCell(
+                              SizedBox(
+                                child: Text(
+                                  DateFormat('HH:mm:ss')
+                                      .format(riwayat[index]['date']),
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                InkWell(
+                  onTap: isSubmitDisabled.value
+                      ? null
+                      : () => submitData().then(
+                            (value) => context.loaderOverlay.hide(),
+                          ),
+                  child: Container(
+                    width: double.infinity,
+                    color: isSubmitDisabled.value ? Colors.grey : Colors.red,
+                    padding: const EdgeInsets.all(10),
+                    child: const Text(
+                      'Submit',
+                      style: TextStyle(
+                        fontSize: 23,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
   }
 }
