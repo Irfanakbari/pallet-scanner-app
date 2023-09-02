@@ -31,12 +31,9 @@ class _ScannerOutState extends State<ScannerOut> {
   @override
   void initState() {
     super.initState();
-    // qrCode.value = "R-BB2BCA021";
-    // getDestination();
     Newlandscanner.listenForBarcodes.listen((event) {
       qrCode.value = event.barcodeData;
       getDestination();
-      isSubmitDisabled.value = false;
     });
   }
 
@@ -47,13 +44,15 @@ class _ScannerOutState extends State<ScannerOut> {
   }
 
   Future<void> getDestination() async {
+    context.loaderOverlay.show();
+
     final cookie = globalController.token;
     final headers = {'Cookie': 'vuteq-token=$cookie'};
 
     try {
       final base = await storage.read(key: '@vuteq-ip');
       final response =
-          await dio.get('http://$base/api/destination/get/${qrCode.value}',
+          await dio.get('$base/api/destination/get/${qrCode.value}',
               options: Options(
                 headers: headers,
                 receiveTimeout: const Duration(milliseconds: 5000),
@@ -71,6 +70,9 @@ class _ScannerOutState extends State<ScannerOut> {
         backgroundColor: Colors.red,
         textColor: Colors.white,
       );
+    } finally {
+      isSubmitDisabled.value = false;
+      context.loaderOverlay.hide();
     }
   }
 
@@ -85,7 +87,7 @@ class _ScannerOutState extends State<ScannerOut> {
 
     try {
       final base = await storage.read(key: '@vuteq-ip');
-      final response = await dio.post('http://$base/api/history',
+      final response = await dio.post('$base/api/history',
           data: postData,
           options: Options(
             headers: headers,
@@ -102,8 +104,6 @@ class _ScannerOutState extends State<ScannerOut> {
         backgroundColor: Colors.green,
         textColor: Colors.white,
       );
-
-      qrCode.value = '-';
     } on DioException catch (e) {
       Fluttertoast.showToast(
         msg: e.response?.data['data'] ?? 'Kesalahan Jaringan/Server',
@@ -113,8 +113,11 @@ class _ScannerOutState extends State<ScannerOut> {
         textColor: Colors.white,
       );
     } finally {
+      qrCode.value = '-';
       selectedValue = null;
+      destination.clear();
       isSubmitDisabled.value = true;
+      context.loaderOverlay.hide();
     }
   }
 
@@ -274,9 +277,9 @@ class _ScannerOutState extends State<ScannerOut> {
                 InkWell(
                   onTap: isSubmitDisabled.value
                       ? null
-                      : () => submitData().then(
-                            (value) => context.loaderOverlay.hide(),
-                          ),
+                      : () async {
+                          await submitData();
+                        },
                   child: Container(
                     width: double.infinity,
                     color: isSubmitDisabled.value ? Colors.grey : Colors.red,

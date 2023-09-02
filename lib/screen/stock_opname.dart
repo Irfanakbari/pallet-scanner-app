@@ -11,14 +11,14 @@ import 'package:newlandscanner/newlandscanner.dart';
 
 import '../controller/global_controller.dart';
 
-class ScannerIn extends StatefulWidget {
-  const ScannerIn({Key? key}) : super(key: key);
+class StockOpname extends StatefulWidget {
+  const StockOpname({Key? key}) : super(key: key);
 
   @override
-  State<ScannerIn> createState() => _ScannerInState();
+  State<StockOpname> createState() => _StockOpnameState();
 }
 
-class _ScannerInState extends State<ScannerIn> {
+class _StockOpnameState extends State<StockOpname> {
   final storage = const FlutterSecureStorage();
   final GlobalController globalController =
       Get.find(); // Inisialisasi controller
@@ -58,8 +58,8 @@ class _ScannerInState extends State<ScannerIn> {
 
       try {
         final base = await storage.read(key: '@vuteq-ip');
-        final response = await dio.put(
-          '$base/api/history',
+        final response = await dio.post(
+          '$base/api/so/pda',
           data: postData,
           options: Options(
             headers: headers,
@@ -104,7 +104,7 @@ class _ScannerInState extends State<ScannerIn> {
                 const SizedBox(height: 20),
                 const Center(
                   child: Text(
-                    'Scanner Pallet Masuk',
+                    'Scanner Stock Opname Pallet',
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -150,67 +150,68 @@ class _ScannerInState extends State<ScannerIn> {
                 //   child: const Text('Open Scanner'),
                 // ),
                 const SizedBox(height: 20),
-                Obx(() => Expanded(
-                      child: SingleChildScrollView(
-                        child: DataTable(
-                          columnSpacing: 10,
-                          headingRowHeight: 40,
-                          dataRowHeight: 60,
-                          columns: const [
-                            DataColumn(label: Text('No')),
-                            DataColumn(label: Text('Pallet ID')),
-                            DataColumn(label: Text('Date')),
-                          ],
-                          rows: List.generate(
-                            riwayat.length,
-                            (index) => DataRow(
-                              color: MaterialStateColor.resolveWith((states) {
-                                return index % 2 == 0
-                                    ? Colors.grey[100]!
-                                    : Colors.white;
-                              }),
-                              cells: [
-                                DataCell(
-                                  SizedBox(
-                                    width: 50,
-                                    child: Text(
-                                      (index + 1).toString(),
-                                      style: const TextStyle(fontSize: 16),
-                                    ),
-                                  ),
+                Expanded(
+                    child: Obx(
+                  () => SingleChildScrollView(
+                    child: DataTable(
+                      columnSpacing: 10,
+                      headingRowHeight: 40,
+                      dataRowHeight: 60,
+                      columns: const [
+                        DataColumn(label: Text('No')),
+                        DataColumn(label: Text('Pallet ID')),
+                        DataColumn(label: Text('Date')),
+                      ],
+                      rows: List.generate(
+                        riwayat.length,
+                        (index) => DataRow(
+                          color: MaterialStateColor.resolveWith((states) {
+                            return index % 2 == 0
+                                ? Colors.grey[100]!
+                                : Colors.white;
+                          }),
+                          cells: [
+                            DataCell(
+                              SizedBox(
+                                width: 50,
+                                child: Text(
+                                  (index + 1).toString(),
+                                  style: const TextStyle(fontSize: 16),
                                 ),
-                                DataCell(
-                                  Container(
-                                    width: 200,
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      riwayat[index]['qr'],
-                                      style: const TextStyle(fontSize: 16),
-                                    ),
-                                  ),
-                                ),
-                                DataCell(
-                                  SizedBox(
-                                    child: Text(
-                                      DateFormat('HH:mm:ss')
-                                          .format(riwayat[index]['date']),
-                                      style: const TextStyle(fontSize: 16),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
-                          ),
+                            DataCell(
+                              Container(
+                                width: 200,
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  riwayat[index]['qr'],
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                              ),
+                            ),
+                            DataCell(
+                              SizedBox(
+                                child: Text(
+                                  DateFormat('HH:mm:ss')
+                                      .format(riwayat[index]['date']),
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    )),
+                    ),
+                  ),
+                )),
                 const SizedBox(height: 20),
                 Obx(
                   () => InkWell(
                     onTap: isSubmitDisabled.value
                         ? null
-                        : () {
-                            submitData();
+                        : () async {
+                            await submitData();
                           },
                     child: Container(
                       width: Get.width,

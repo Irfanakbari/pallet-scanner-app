@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 
 import '../controller/global_controller.dart';
 
@@ -23,7 +22,6 @@ class _RiwayatState extends State<Riwayat> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     riwayat.clear();
   }
@@ -31,7 +29,6 @@ class _RiwayatState extends State<Riwayat> {
   @override
   void initState() {
     super.initState();
-    // Load the data from the Hive database when the widget initializes
     loadHistoryEntries();
   }
 
@@ -45,7 +42,7 @@ class _RiwayatState extends State<Riwayat> {
     try {
       // Get the list of HistoryEntry objects from the Hive database
       final base = await storage.read(key: '@vuteq-ip');
-      final response = await dio.get('http://$base/api/history/operator',
+      final response = await dio.get('$base/api/history/operator',
           options: Options(
             headers: headers,
             receiveTimeout: const Duration(milliseconds: 5000),
@@ -88,64 +85,66 @@ class _RiwayatState extends State<Riwayat> {
               const SizedBox(height: 20),
               Expanded(
                   child: SingleChildScrollView(
-                child: Obx(() => DataTable(
-                      columnSpacing: 10, // Mengatur jarak antar kolom
-                      headingRowHeight: 40, // Mengatur tinggi baris header
-                      dataRowHeight: 60, // Mengatur tinggi baris data
-                      columns: const [
-                        DataColumn(label: Text('No')),
-                        DataColumn(label: Text('Pallet ID')),
-                        DataColumn(label: Text('Status')),
-                        DataColumn(label: Text('Time')),
-                      ],
-                      rows: List.generate(
-                        riwayat.length,
-                        (index) => DataRow(
-                          color: MaterialStateColor.resolveWith((states) {
-                            // Mengatur warna latar belakang untuk baris genap dan ganjil
-                            return index % 2 == 0
-                                ? Colors.grey[100]!
-                                : Colors.white;
-                          }),
-                          cells: [
-                            DataCell(
-                              SizedBox(
-                                width: 30, // Lebar sel
-                                child: Text(
-                                  (index + 1).toString(),
+                child: Obx(() => Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: DataTable(
+                        columnSpacing: 10, // Mengatur jarak antar kolom
+                        headingRowHeight: 40, // Mengatur tinggi baris header
+                        dataRowHeight: 60, // Mengatur tinggi baris data
+                        columns: const [
+                          DataColumn(label: Text('No')),
+                          DataColumn(label: Text('Pallet ID')),
+                          DataColumn(label: Text('Status')),
+                          DataColumn(label: Text('Time')),
+                        ],
+                        rows: List.generate(
+                          riwayat.length,
+                          (index) => DataRow(
+                            color: MaterialStateColor.resolveWith((states) {
+                              // Mengatur warna latar belakang untuk baris genap dan ganjil
+                              return index % 2 == 0
+                                  ? Colors.grey[100]!
+                                  : Colors.white;
+                            }),
+                            cells: [
+                              DataCell(
+                                SizedBox(
+                                  width: 30, // Lebar sel
+                                  child: Text(
+                                    (index + 1).toString(),
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                Container(
+                                  width: 135,
+                                  alignment: Alignment
+                                      .centerLeft, // Posisi isi sel di tengah kiri
+                                  child: Text(
+                                    riwayat[index]['id_pallet'],
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                // Added the 'Status' cell
+                                Text(
+                                  riwayat[index][
+                                      'status'], // Replace this with the actual status data
                                   style: const TextStyle(fontSize: 16),
                                 ),
                               ),
-                            ),
-                            DataCell(
-                              Container(
-                                width: 135,
-                                alignment: Alignment
-                                    .centerLeft, // Posisi isi sel di tengah kiri
-                                child: Text(
-                                  riwayat[index]['id_pallet'],
-                                  style: const TextStyle(fontSize: 16),
+                              DataCell(
+                                SizedBox(
+                                  child: Text(
+                                    riwayat[index]['timestamp'],
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            DataCell(
-                              // Added the 'Status' cell
-                              Text(
-                                riwayat[index][
-                                    'status'], // Replace this with the actual status data
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                            ),
-                            DataCell(
-                              SizedBox(
-                                child: Text(
-                                  DateFormat('HH:mm:ss').format(DateTime.parse(
-                                      riwayat[index]['timestamp'])),
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                              ),
-                            ),
-                          ],
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     )),

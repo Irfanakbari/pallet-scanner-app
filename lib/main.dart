@@ -1,19 +1,15 @@
 import 'package:easy_splash_screen/easy_splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hive_flutter/hive_flutter.dart'; // Import this if you want to use Hive with Flutter
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:palestine_first_run/palestine_first_run.dart';
 import 'package:pallet_vuteq/screen/homepage.dart';
 import 'package:pallet_vuteq/screen/ip_change.dart';
 import 'package:pallet_vuteq/screen/login.dart';
 
 import 'controller/global_controller.dart';
-import 'model/history_entry.dart';
 
 void main() {
-  Hive
-    ..initFlutter()
-    ..registerAdapter(HistoryEntryAdapter());
   runApp(const MyApp());
 }
 
@@ -47,6 +43,8 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    initializeDateFormatting('id_ID', null);
+
     // First time (true), then (false)
     return GetMaterialApp(
         title: 'Pallet Scanner',

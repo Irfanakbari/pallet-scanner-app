@@ -59,7 +59,7 @@ class _ScannerRepairState extends State<ScannerRepair> {
       try {
         final base = await storage.read(key: '@vuteq-ip');
         final response = await dio.post(
-          'http://$base/api/repairs',
+          '$base/api/repairs',
           data: postData,
           options: Options(
             headers: headers,
@@ -77,8 +77,6 @@ class _ScannerRepairState extends State<ScannerRepair> {
           backgroundColor: Colors.green,
           textColor: Colors.white,
         );
-
-        qrCode.value = '-';
       } on DioException catch (e) {
         Fluttertoast.showToast(
           msg: e.response?.data['data'] ?? 'Kesalahan Jaringan/Server',
@@ -88,7 +86,9 @@ class _ScannerRepairState extends State<ScannerRepair> {
           textColor: Colors.white,
         );
       } finally {
+        qrCode.value = '-';
         isSubmitDisabled.value = true;
+        context.loaderOverlay.hide();
       }
     }
 
@@ -132,8 +132,27 @@ class _ScannerRepairState extends State<ScannerRepair> {
                   ),
                 ),
                 const SizedBox(height: 20),
+                // ElevatedButton(
+                //   onPressed: () async {
+                //     var res = await Navigator.push(
+                //         context,
+                //         MaterialPageRoute(
+                //           builder: (context) =>
+                //               const SimpleBarcodeScannerPage(),
+                //         ));
+                //     setState(() {
+                //       if (res is String) {
+                //         qrCode.value = res;
+                //         isSubmitDisabled.value = false;
+                //       }
+                //     });
+                //   },
+                //   child: const Text('Open Scanner'),
+                // ),
+                const SizedBox(height: 20),
                 Expanded(
-                  child: SingleChildScrollView(
+                    child: Obx(
+                  () => SingleChildScrollView(
                     child: DataTable(
                       columnSpacing: 10,
                       headingRowHeight: 40,
@@ -174,7 +193,7 @@ class _ScannerRepairState extends State<ScannerRepair> {
                             DataCell(
                               SizedBox(
                                 child: Text(
-                                  DateFormat('dd-MM-yyyy HH:mm:ss')
+                                  DateFormat('HH:mm:ss')
                                       .format(riwayat[index]['date']),
                                   style: const TextStyle(fontSize: 16),
                                 ),
@@ -185,28 +204,29 @@ class _ScannerRepairState extends State<ScannerRepair> {
                       ),
                     ),
                   ),
-                ),
+                )),
                 const SizedBox(height: 20),
-                InkWell(
-                  onTap: isSubmitDisabled.value
-                      ? null
-                      : () {
-                          submitData()
-                              .then((value) => context.loaderOverlay.hide());
-                        },
-                  child: Container(
-                    width: Get.width,
-                    color: isSubmitDisabled.value ? Colors.grey : Colors.red,
-                    child: const Padding(
-                      padding: EdgeInsets.all(10),
-                      child: Text(
-                        'Submit',
-                        style: TextStyle(fontSize: 23, color: Colors.white),
-                        textAlign: TextAlign.center,
+                Obx(
+                  () => InkWell(
+                    onTap: isSubmitDisabled.value
+                        ? null
+                        : () async {
+                            await submitData();
+                          },
+                    child: Container(
+                      width: Get.width,
+                      color: isSubmitDisabled.value ? Colors.grey : Colors.red,
+                      child: const Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Text(
+                          'Submit',
+                          style: TextStyle(fontSize: 23, color: Colors.white),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
                   ),
-                ),
+                )
               ],
             ),
           ),

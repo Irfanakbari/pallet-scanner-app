@@ -72,7 +72,7 @@ class _LoginState extends State<Login> {
       try {
         final base = await storage.read(key: '@vuteq-ip');
         final response = await dio.post(
-            'http://$base/api/auth/login', // Ganti URL sesuai dengan endpoint login Anda
+            '$base/api/auth/login', // Ganti URL sesuai dengan endpoint login Anda
             data: {'username': username, 'password': password},
             options: Options(
               receiveTimeout: const Duration(milliseconds: 5000),
