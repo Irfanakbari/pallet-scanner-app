@@ -49,8 +49,6 @@ dependencies:
   flutter_easy_table: ^0.0.1+1
   intl: ^0.18.1
   path_provider: ^2.0.15
-  simple_barcode_scanner: ^0.0.8
-  button_with_loader: ^0.1.3
 dev_dependencies:
   flutter_test:
     sdk: flutter
