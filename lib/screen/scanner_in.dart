@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:newlandscanner/newlandscanner.dart';
+import 'package:status_alert/status_alert.dart';
 
 import '../controller/global_controller.dart';
 
@@ -27,6 +28,49 @@ class _ScannerInState extends State<ScannerIn> {
   RxList riwayat = [].obs;
   RxBool isSubmitDisabled = true.obs;
 
+  void showAlert(String title, String subtitle, Color backgroundColor) {
+    if (mounted) {
+      StatusAlert.show(
+        context,
+        duration: const Duration(seconds: 2),
+        title: title,
+        subtitle: subtitle,
+        backgroundColor: backgroundColor,
+        titleOptions: StatusAlertTextConfiguration(
+          style: const TextStyle(color: Colors.white),
+        ),
+        subtitleOptions: StatusAlertTextConfiguration(
+          style: const TextStyle(color: Colors.white),
+        ),
+        configuration: const IconConfiguration(
+          icon: Icons.error,
+          color: Colors.white,
+        ),
+      );
+    }
+  }
+
+  void showSuccessAlert(String title, String subtitle, Color backgroundColor) {
+    if (mounted) {
+      StatusAlert.show(
+        context,
+        duration: const Duration(seconds: 2),
+        title: title,
+        subtitle: subtitle,
+        backgroundColor: backgroundColor,
+        titleOptions: StatusAlertTextConfiguration(
+          style: const TextStyle(color: Colors.white),
+        ),
+        subtitleOptions: StatusAlertTextConfiguration(
+          style: const TextStyle(color: Colors.white),
+        ),
+        configuration: const IconConfiguration(
+          icon: Icons.done,
+          color: Colors.white,
+        ),
+      );
+    }
+  }
   @override
   void initState() {
     super.initState();
@@ -44,29 +88,26 @@ class _ScannerInState extends State<ScannerIn> {
 
   @override
   Widget build(BuildContext context) {
+
     Future<void> submitData() async {
       context.loaderOverlay.show();
-      final cookie = globalController.token;
-
+      final cookie = await storage.read(
+          key: '@vuteq-token');
       final headers = {
-        'Cookie': 'vuteq-token=$cookie',
+        'Authorization': 'Bearer $cookie',
       };
-
       final Map<String, dynamic> postData = {
         'kode': qrCode.value,
       };
 
       try {
-        final base = await storage.read(key: '@vuteq-ip');
-        final response = await dio.put(
-          '$base/api/history',
-          data: postData,
-          options: Options(
-            headers: headers,
-            receiveTimeout: const Duration(milliseconds: 5000),
-            sendTimeout: const Duration(milliseconds: 5000),
-          ),
-        );
+        final response = await dio.patch('http://10.10.10.10:4000/histories',
+            data: postData,
+            options: Options(
+              headers: headers,
+              receiveTimeout: const Duration(milliseconds: 5000),
+              sendTimeout: const Duration(milliseconds: 5000),
+            ));
 
         riwayat.add({"qr": qrCode.value, "date": DateTime.now()});
 
@@ -78,8 +119,9 @@ class _ScannerInState extends State<ScannerIn> {
           textColor: Colors.white,
         );
       } on DioException catch (e) {
+        print(e);
         Fluttertoast.showToast(
-          msg: e.response?.data['data'] ?? 'Kesalahan Jaringan/Server',
+          msg: e.response?.data['message'] ?? 'Kesalahan Jaringan/Server',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.red,
@@ -149,7 +191,6 @@ class _ScannerInState extends State<ScannerIn> {
                 //   },
                 //   child: const Text('Open Scanner'),
                 // ),
-                const SizedBox(height: 20),
                 Obx(() => Expanded(
                       child: SingleChildScrollView(
                         child: DataTable(

@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:palestine_first_run/palestine_first_run.dart';
-import 'package:pallet_vuteq/screen/homepage.dart';
-import 'package:pallet_vuteq/screen/ip_change.dart';
 import 'package:pallet_vuteq/screen/login.dart';
 
 import 'controller/global_controller.dart';
@@ -52,27 +50,23 @@ class _MyAppState extends State<MyApp> {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: Obx(() => EasySplashScreen(
-              logo: Image.asset(
-                'assets/images/logo.png',
-                width: 300,
-              ),
-              title: const Text(
-                "Pallet Management",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              backgroundColor: Colors.grey.shade400,
-              showLoader: true,
-              loadingText: const Text("Loading..."),
-              navigator: isFirst.value
-                  ? const IpChange()
-                  : isLogin.value
-                      ? const MyHomePage()
-                      : const Login(),
-              durationInSeconds: 2,
-            )));
+        home:EasySplashScreen(
+          logo: Image.asset(
+            'assets/images/logo.png',
+            width: 300,
+          ),
+          title: const Text(
+            "Pallet Control Scanner",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          backgroundColor: Colors.grey.shade400,
+          showLoader: true,
+          loadingText: const Text("Loading..."),
+          navigator: const Login(),
+          durationInSeconds: 2,
+        ));
   }
 }

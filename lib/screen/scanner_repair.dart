@@ -8,7 +8,6 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:newlandscanner/newlandscanner.dart';
-
 import '../controller/global_controller.dart';
 
 class ScannerRepair extends StatefulWidget {
@@ -46,27 +45,23 @@ class _ScannerRepairState extends State<ScannerRepair> {
   Widget build(BuildContext context) {
     Future<void> submitData() async {
       context.loaderOverlay.show();
-      final cookie = globalController.token;
-
+      final cookie = await storage.read(
+          key: '@vuteq-token');
       final headers = {
-        'Cookie': 'vuteq-token=$cookie',
+        'Authorization': 'Bearer $cookie',
       };
-
       final Map<String, dynamic> postData = {
         'kode': qrCode.value,
       };
 
       try {
-        final base = await storage.read(key: '@vuteq-ip');
-        final response = await dio.post(
-          '$base/api/repairs',
-          data: postData,
-          options: Options(
-            headers: headers,
-            receiveTimeout: const Duration(milliseconds: 5000),
-            sendTimeout: const Duration(milliseconds: 5000),
-          ),
-        );
+        final response = await dio.patch('http://10.10.10.10:4000/repairs',
+            data: postData,
+            options: Options(
+              headers: headers,
+              receiveTimeout: const Duration(milliseconds: 5000),
+              sendTimeout: const Duration(milliseconds: 5000),
+            ));
 
         riwayat.add({"qr": qrCode.value, "date": DateTime.now()});
 

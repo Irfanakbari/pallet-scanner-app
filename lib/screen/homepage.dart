@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:material_dialogs/material_dialogs.dart';
 import 'package:material_dialogs/widgets/buttons/icon_button.dart';
 import 'package:material_dialogs/widgets/buttons/icon_outline_button.dart';
-import 'package:pallet_vuteq/screen/ip_change2.dart';
 import 'package:pallet_vuteq/screen/login.dart';
 import 'package:pallet_vuteq/screen/riwayat.dart';
 import 'package:pallet_vuteq/screen/scanner_in.dart';
@@ -169,38 +168,38 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
                 const SizedBox(height: 10.0),
-                InkWell(
-                  onTap: () => Get.to(const StockOpname()),
-                  child: Container(
-                    width: Get.width,
-                    color: Colors.purpleAccent,
-                    child: const Padding(
-                      padding: EdgeInsets.all(15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons
-                                .calculate, // Ganti dengan ikon yang diinginkan
-                            color: Colors.white,
-                            size: 24.0,
-                          ),
-                          SizedBox(width: 10),
-                          Text(
-                            'Scan Stock Opname',
-                            style: TextStyle(
-                              fontSize: 22.0,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10.0),
+                // InkWell(
+                //   onTap: () => Get.to(const StockOpname()),
+                //   child: Container(
+                //     width: Get.width,
+                //     color: Colors.purpleAccent,
+                //     child: const Padding(
+                //       padding: EdgeInsets.all(15),
+                //       child: Row(
+                //         mainAxisAlignment: MainAxisAlignment.center,
+                //         children: [
+                //           Icon(
+                //             Icons
+                //                 .calculate, // Ganti dengan ikon yang diinginkan
+                //             color: Colors.white,
+                //             size: 24.0,
+                //           ),
+                //           SizedBox(width: 10),
+                //           Text(
+                //             'Scan Stock Opname',
+                //             style: TextStyle(
+                //               fontSize: 22.0,
+                //               color: Colors.white,
+                //               fontWeight: FontWeight.bold,
+                //             ),
+                //             textAlign: TextAlign.center,
+                //           ),
+                //         ],
+                //       ),
+                //     ),
+                //   ),
+                // ),
+                // const SizedBox(height: 10.0),
                 InkWell(
                   onTap: () => Get.to(const Riwayat()),
                   child: Container(
@@ -261,7 +260,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                       ]),
                   style: ElevatedButton.styleFrom(
-                    primary: Colors.red, // Warna tombol 'Scanner Masuk'
+                    backgroundColor: Colors.red, // Warna tombol 'Scanner Masuk'
                     padding: const EdgeInsets.symmetric(
                         horizontal: 30, vertical: 10),
                   ),
@@ -277,32 +276,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       SizedBox(width: 8), // Jarak antara ikon dan teks
                       Text(
                         'Logout',
-                        style: TextStyle(fontSize: 15.0, color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Get.to(const IpChange2());
-                  },
-                  style: ElevatedButton.styleFrom(
-                    primary:
-                        Colors.blueAccent, // Warna tombol 'Ganti IP Server'
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 30, vertical: 10),
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.settings, // Ganti dengan ikon Settings
-                        size: 20.0,
-                        color: Colors.white,
-                      ),
-                      SizedBox(width: 8), // Jarak antara ikon dan teks
-                      Text(
-                        'IP Setting',
                         style: TextStyle(fontSize: 15.0, color: Colors.white),
                       ),
                     ],

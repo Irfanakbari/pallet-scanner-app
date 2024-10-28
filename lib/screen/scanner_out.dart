@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:newlandscanner/newlandscanner.dart';
+import 'package:status_alert/status_alert.dart';
 
 import '../controller/global_controller.dart';
 
@@ -23,6 +24,7 @@ class _ScannerOutState extends State<ScannerOut> {
   final GlobalController globalController = Get.find();
   final dio = Dio();
   RxString qrCode = "-".obs;
+  RxString actPart = "-".obs;
   RxList riwayat = [].obs;
   RxList destination = [].obs;
   String? selectedValue;
@@ -32,8 +34,12 @@ class _ScannerOutState extends State<ScannerOut> {
   void initState() {
     super.initState();
     Newlandscanner.listenForBarcodes.listen((event) {
-      qrCode.value = event.barcodeData;
-      getDestination();
+      if (qrCode.value != '-'){
+        actPart.value = event.barcodeData;
+      } else {
+        qrCode.value = event.barcodeData;
+        getDestination();
+      }
     });
   }
 
@@ -43,16 +49,62 @@ class _ScannerOutState extends State<ScannerOut> {
     riwayat.clear();
   }
 
+  void showAlert(String title, String subtitle, Color backgroundColor) {
+    if (mounted) {
+      StatusAlert.show(
+        context,
+        duration: const Duration(seconds: 2),
+        title: title,
+        subtitle: subtitle,
+        backgroundColor: backgroundColor,
+        titleOptions: StatusAlertTextConfiguration(
+          style: const TextStyle(color: Colors.white),
+        ),
+        subtitleOptions: StatusAlertTextConfiguration(
+          style: const TextStyle(color: Colors.white),
+        ),
+        configuration: const IconConfiguration(
+          icon: Icons.error,
+          color: Colors.white,
+        ),
+      );
+    }
+  }
+
+  void showSuccessAlert(String title, String subtitle, Color backgroundColor) {
+    if (mounted) {
+      StatusAlert.show(
+        context,
+        duration: const Duration(seconds: 2),
+        title: title,
+        subtitle: subtitle,
+        backgroundColor: backgroundColor,
+        titleOptions: StatusAlertTextConfiguration(
+          style: const TextStyle(color: Colors.white),
+        ),
+        subtitleOptions: StatusAlertTextConfiguration(
+          style: const TextStyle(color: Colors.white),
+        ),
+        configuration: const IconConfiguration(
+          icon: Icons.done,
+          color: Colors.white,
+        ),
+      );
+    }
+  }
+
   Future<void> getDestination() async {
     context.loaderOverlay.show();
 
-    final cookie = globalController.token;
-    final headers = {'Cookie': 'vuteq-token=$cookie'};
-
+    final cookie = await storage.read(
+        key: '@vuteq-token');
+    print(cookie);
+    final headers = {
+      'Authorization': 'Bearer $cookie',
+    };
     try {
-      final base = await storage.read(key: '@vuteq-ip');
       final response =
-          await dio.get('$base/api/destination/get/${qrCode.value}',
+          await dio.get('http://10.10.10.10:4000/destinations?qr=${qrCode.value}',
               options: Options(
                 headers: headers,
                 receiveTimeout: const Duration(milliseconds: 5000),
@@ -63,6 +115,7 @@ class _ScannerOutState extends State<ScannerOut> {
         selectedValue = destination[0]['name'];
       }
     } on DioException catch (e) {
+      print(e);
       Fluttertoast.showToast(
         msg: 'Gagal Mengambil Data Destinasi',
         toastLength: Toast.LENGTH_SHORT,
@@ -78,16 +131,19 @@ class _ScannerOutState extends State<ScannerOut> {
 
   Future<void> submitData() async {
     context.loaderOverlay.show();
-    final cookie = globalController.token;
-    final headers = {'Cookie': 'vuteq-token=$cookie'};
+    final cookie = await storage.read(
+        key: '@vuteq-token');
+    final headers = {
+      'Authorization': 'Bearer $cookie',
+    };
     final Map<String, dynamic> postData = {
       'kode': qrCode.value,
-      'destination': selectedValue
+      'destination': selectedValue,
+      "act_part": actPart.value
     };
 
     try {
-      final base = await storage.read(key: '@vuteq-ip');
-      final response = await dio.post('$base/api/history',
+      final response = await dio.post('http://10.10.10.10:4000/histories',
           data: postData,
           options: Options(
             headers: headers,
@@ -98,15 +154,16 @@ class _ScannerOutState extends State<ScannerOut> {
       riwayat.add({"qr": qrCode.value, "date": DateTime.now()});
 
       Fluttertoast.showToast(
-        msg: response.data['data'],
+        msg: response.data['message'],
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.green,
         textColor: Colors.white,
       );
     } on DioException catch (e) {
+      print(e);
       Fluttertoast.showToast(
-        msg: e.response?.data['data'] ?? 'Kesalahan Jaringan/Server',
+        msg: e.response?.data['message'] ?? 'Kesalahan Jaringan/Server',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.red,
@@ -114,9 +171,10 @@ class _ScannerOutState extends State<ScannerOut> {
       );
     } finally {
       qrCode.value = '-';
+      actPart.value = '-';
       selectedValue = null;
       destination.clear();
-      isSubmitDisabled.value = true;
+
       context.loaderOverlay.hide();
     }
   }
@@ -159,6 +217,31 @@ class _ScannerOutState extends State<ScannerOut> {
                   ),
                 ),
                 const SizedBox(height: 20),
+                const Center(
+                  child: Text(
+                    'Actual Part Number',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  color: Colors.grey,
+                  height: 60,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  alignment: Alignment.center,
+                  child: Obx(
+                        () => Text(
+                      actPart.value,
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
                 // ElevatedButton(
                 //   onPressed: () async {
                 //     var res = await Navigator.push(
@@ -169,9 +252,12 @@ class _ScannerOutState extends State<ScannerOut> {
                 //         ));
                 //     setState(() {
                 //       if (res is String) {
-                //         qrCode.value = res;
-                //         getDestination();
-                //         isSubmitDisabled.value = false;
+                //         if (qrCode.value != '-'){
+                //           actPart.value = res;
+                //         } else {
+                //           qrCode.value = res;
+                //           getDestination();
+                //         }
                 //       }
                 //     });
                 //   },
@@ -275,14 +361,14 @@ class _ScannerOutState extends State<ScannerOut> {
                 ),
                 const SizedBox(height: 20),
                 InkWell(
-                  onTap: isSubmitDisabled.value
+                  onTap: (isSubmitDisabled.value && actPart.value == '-')
                       ? null
                       : () async {
-                          await submitData();
-                        },
+                    await submitData();
+                  },
                   child: Container(
                     width: double.infinity,
-                    color: isSubmitDisabled.value ? Colors.grey : Colors.red,
+                    color: (isSubmitDisabled.value && actPart.value == '-') ? Colors.grey : Colors.red,
                     padding: const EdgeInsets.all(10),
                     child: const Text(
                       'Submit',
