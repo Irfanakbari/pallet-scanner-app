@@ -168,38 +168,38 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
                 const SizedBox(height: 10.0),
-                // InkWell(
-                //   onTap: () => Get.to(const StockOpname()),
-                //   child: Container(
-                //     width: Get.width,
-                //     color: Colors.purpleAccent,
-                //     child: const Padding(
-                //       padding: EdgeInsets.all(15),
-                //       child: Row(
-                //         mainAxisAlignment: MainAxisAlignment.center,
-                //         children: [
-                //           Icon(
-                //             Icons
-                //                 .calculate, // Ganti dengan ikon yang diinginkan
-                //             color: Colors.white,
-                //             size: 24.0,
-                //           ),
-                //           SizedBox(width: 10),
-                //           Text(
-                //             'Scan Stock Opname',
-                //             style: TextStyle(
-                //               fontSize: 22.0,
-                //               color: Colors.white,
-                //               fontWeight: FontWeight.bold,
-                //             ),
-                //             textAlign: TextAlign.center,
-                //           ),
-                //         ],
-                //       ),
-                //     ),
-                //   ),
-                // ),
-                // const SizedBox(height: 10.0),
+                InkWell(
+                  onTap: () => Get.to(const StockOpname()),
+                  child: Container(
+                    width: Get.width,
+                    color: Colors.purpleAccent,
+                    child: const Padding(
+                      padding: EdgeInsets.all(15),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons
+                                .calculate, // Ganti dengan ikon yang diinginkan
+                            color: Colors.white,
+                            size: 24.0,
+                          ),
+                          SizedBox(width: 10),
+                          Text(
+                            'Scan Stock Opname',
+                            style: TextStyle(
+                              fontSize: 22.0,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10.0),
                 InkWell(
                   onTap: () => Get.to(const Riwayat()),
                   child: Container(
