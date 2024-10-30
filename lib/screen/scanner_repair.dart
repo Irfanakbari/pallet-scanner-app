@@ -66,7 +66,7 @@ class _ScannerRepairState extends State<ScannerRepair> {
         riwayat.add({"qr": qrCode.value, "date": DateTime.now()});
 
         Fluttertoast.showToast(
-          msg: response.data['data'],
+          msg: response.data['message'],
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.green,
@@ -74,7 +74,7 @@ class _ScannerRepairState extends State<ScannerRepair> {
         );
       } on DioException catch (e) {
         Fluttertoast.showToast(
-          msg: e.response?.data['data'] ?? 'Kesalahan Jaringan/Server',
+          msg: e.response?.data['message'] ?? 'Kesalahan Jaringan/Server',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.red,

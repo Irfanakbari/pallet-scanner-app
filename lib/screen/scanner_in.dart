@@ -112,7 +112,7 @@ class _ScannerInState extends State<ScannerIn> {
         riwayat.add({"qr": qrCode.value, "date": DateTime.now()});
 
         Fluttertoast.showToast(
-          msg: response.data['data'],
+          msg: response.data['message'],
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.green,

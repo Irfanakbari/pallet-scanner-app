@@ -46,20 +46,18 @@ class _StockOpnameState extends State<StockOpname> {
   Widget build(BuildContext context) {
     Future<void> submitData() async {
       context.loaderOverlay.show();
-      final cookie = globalController.token;
-
+      final cookie = await storage.read(
+          key: '@vuteq-token');
       final headers = {
-        'Cookie': 'vuteq-token=$cookie',
+        'Authorization': 'Bearer $cookie',
       };
-
       final Map<String, dynamic> postData = {
         'kode': qrCode.value,
       };
 
       try {
-        final base = await storage.read(key: '@vuteq-ip');
         final response = await dio.post(
-          '$base/api/so/pda',
+          'http://10.10.10.10:4000/stockopnames/scan',
           data: postData,
           options: Options(
             headers: headers,
@@ -71,7 +69,7 @@ class _StockOpnameState extends State<StockOpname> {
         riwayat.add({"qr": qrCode.value, "date": DateTime.now()});
 
         Fluttertoast.showToast(
-          msg: response.data['data'],
+          msg: response.data['message'],
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.green,
@@ -79,7 +77,7 @@ class _StockOpnameState extends State<StockOpname> {
         );
       } on DioException catch (e) {
         Fluttertoast.showToast(
-          msg: e.response?.data['data'] ?? 'Kesalahan Jaringan/Server',
+          msg: e.response?.data['message'] ?? 'Kesalahan Jaringan/Server',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.red,
